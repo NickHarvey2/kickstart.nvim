@@ -93,6 +93,14 @@ require('lazy').setup({
     },
   },
 
+  -- NERDtree _shouldn't_ require config I think
+  {
+    'preservim/nerdtree',
+    config = function()
+      vim.keymap.set('n', '<C-\\>', ':NERDTreeFocus<CR>', { noremap = true, silent = true })
+    end,
+  },
+
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -147,6 +155,9 @@ require('lazy').setup({
     'navarasu/onedark.nvim',
     priority = 1000,
     config = function()
+      require('onedark').setup({
+        transparent = true
+      })
       vim.cmd.colorscheme 'onedark'
     end,
   },
@@ -227,7 +238,7 @@ require('lazy').setup({
 -- NOTE: You can change these options as you wish!
 
 -- Set highlight on search
-vim.o.hlsearch = false
+vim.o.hlsearch = true
 
 -- Make line numbers default
 vim.wo.number = true
@@ -272,6 +283,9 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
+
+-- Search for selected text
+--vim.api.nvim_set_keymap('v', '<leader>/', 'y/\\V<C-R>"<CR>', { noremap = true, silent = true })
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
