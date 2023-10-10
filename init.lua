@@ -93,14 +93,6 @@ require('lazy').setup({
     },
   },
 
-  -- NERDtree _shouldn't_ require config I think
-  {
-    'preservim/nerdtree',
-    config = function()
-      vim.keymap.set('n', '<C-\\>', ':NERDTreeFocus<CR>', { noremap = true, silent = true })
-    end,
-  },
-
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
@@ -283,9 +275,6 @@ vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 -- Remap for dealing with word wrap
 vim.keymap.set('n', 'k', "v:count == 0 ? 'gk' : 'k'", { expr = true, silent = true })
 vim.keymap.set('n', 'j', "v:count == 0 ? 'gj' : 'j'", { expr = true, silent = true })
-
--- Search for selected text
---vim.api.nvim_set_keymap('v', '<leader>/', 'y/\\V<C-R>"<CR>', { noremap = true, silent = true })
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
