@@ -185,7 +185,7 @@ require('lazy').setup({
     opts = {},
   },
 
-  -- "gc" to comment visual regions/lines
+  -- "gc" to comment visual regions/line--[[ s ]]
   { 'numToStr/Comment.nvim', opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
@@ -627,6 +627,9 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+
+vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
+vim.cmd('highlight SpellBad guibg=#772222 gui=underline')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
