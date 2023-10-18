@@ -242,19 +242,19 @@ require('lazy').setup({
         's1n7ax/nvim-window-picker',
         version = '2.*',
         config = function()
-            require 'window-picker'.setup({
-                filter_rules = {
-                    include_current_win = false,
-                    autoselect_one = true,
-                    -- filter using buffer options
-                    bo = {
-                        -- if the file type is one of following, the window will be ignored
-                        filetype = { 'neo-tree', "neo-tree-popup", "notify" },
-                        -- if the buffer type is one of following, the window will be ignored
-                        buftype = { 'terminal', "quickfix" },
-                    },
+          require 'window-picker'.setup({
+            filter_rules = {
+              include_current_win = false,
+              autoselect_one = true,
+              -- filter using buffer options
+              bo = {
+                -- if the file type is one of following, the window will be ignored
+                filetype = { 'neo-tree', "neo-tree-popup", "notify" },
+                -- if the buffer type is one of following, the window will be ignored
+                buftype = { 'terminal', "quickfix" },
+              },
             },
-        })
+          })
         end,
       }
     },
@@ -296,6 +296,8 @@ require('lazy').setup({
       })
     end,
   },
+
+  "dhruvasagar/vim-table-mode",
 }, {})
 
 -- [[ Setting options ]]
@@ -629,7 +631,11 @@ cmp.setup {
 }
 
 vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
-vim.cmd('highlight SpellBad guibg=#772222 gui=underline')
+vim.cmd('autocmd FileType markdown set wrap linebreak')
+vim.cmd('autocmd FileType markdown set tabstop=4')
+vim.cmd('highlight CursorLine guibg=#003636')
+vim.opt.cursorline = true
+vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
