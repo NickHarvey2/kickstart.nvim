@@ -298,6 +298,23 @@ require('lazy').setup({
   },
 
   "dhruvasagar/vim-table-mode",
+
+  {
+    "windwp/nvim-autopairs",
+    -- Optional dependency
+    dependencies = { 'hrsh7th/nvim-cmp' },
+    config = function()
+      vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>', { noremap = true, silent = true })
+      require("nvim-autopairs").setup {}
+      -- If you want to automatically add `(` after selecting a function or method
+      local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+      local cmp = require('cmp')
+      cmp.event:on(
+        'confirm_done',
+        cmp_autopairs.on_confirm_done()
+      )
+    end,
+  },
 }, {})
 
 -- [[ Setting options ]]
@@ -633,7 +650,7 @@ cmp.setup {
 vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
 vim.cmd('autocmd FileType markdown set wrap linebreak')
 vim.cmd('autocmd FileType markdown set tabstop=4')
-vim.cmd('highlight CursorLine guibg=#003636')
+vim.cmd('highlight CursorLine guibg=#383c44')
 vim.opt.cursorline = true
 vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
 
