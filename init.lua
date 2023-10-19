@@ -304,7 +304,6 @@ require('lazy').setup({
     -- Optional dependency
     dependencies = { 'hrsh7th/nvim-cmp' },
     config = function()
-      vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>', { noremap = true, silent = true })
       require("nvim-autopairs").setup {}
       -- If you want to automatically add `(` after selecting a function or method
       local cmp_autopairs = require('nvim-autopairs.completion.cmp')
@@ -646,6 +645,17 @@ cmp.setup {
     { name = 'luasnip' },
   },
 }
+
+-- keymaps for wrapping selected text in various things
+vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '[', '<esc>`>a]<esc>`<i[<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '{', '<esc>`>a}<esc>`<i{<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '<', '<esc>`>a><esc>`<i<<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '"', '<esc>`>a"<esc>`<i"<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '\'', '<esc>`>a\'<esc>`<i\'<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '~', '<esc>`>a~<esc>`<i~<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '`', '<esc>`>a`<esc>`<i`<esc>lv`>l', { noremap = true, silent = true })
+vim.keymap.set('v', '<C-k>', '<esc>`<i[<esc>`>la]()<esc>', { noremap = true, silent = true })
 
 vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
 vim.cmd('autocmd FileType markdown set wrap linebreak')
