@@ -658,7 +658,7 @@ vim.keymap.set('v', '=', '<esc>`>a=<esc>`<i=<esc>lv`>l', { noremap = true, silen
 vim.keymap.set('v', '\'', '<esc>`>a\'<esc>`<i\'<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '~', '<esc>`>a~<esc>`<i~<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '`', '<esc>`>a`<esc>`<i`<esc>lv`>l', { noremap = true, silent = true })
-vim.keymap.set('v', '<C-k>', '<esc>`<i[<esc>`>la]()<esc>', { noremap = true, silent = true })
+vim.keymap.set('v', '<C-k>', '<esc>`<i[<esc>`>la]()<esc>h', { noremap = true, silent = true })
 
 vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
 vim.cmd('autocmd FileType markdown set wrap linebreak')
