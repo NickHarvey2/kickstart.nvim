@@ -314,6 +314,53 @@ require('lazy').setup({
       )
     end,
   },
+
+  {
+    "jakewvincent/mkdnflow.nvim",
+    config = function()
+      require('mkdnflow').setup({
+        modules = {
+          bib = false,
+          buffers = true,
+          conceal = false,
+          cursor = true,
+          folds = false,
+          links = true,
+          lists = true,
+          maps = true,
+          paths = true,
+          tables = true,
+          yaml = false
+        },
+        perspective = {
+          priority = 'root',
+          root_tell = '.git',
+        },
+        links = {
+          style = 'markdown',
+          conceal = false,
+          context = 0,
+          implicit_extension = 'md',
+          transform_implicit = function(input)
+            -- right now this has trouble with titles that begin with `@`
+            if input:match('^@') then
+              return('People/'..input)
+            else
+              return(input)
+            end
+          end,
+          -- transform_explicit = false,
+        },
+        -- following commented out for now, TODO trouble shoot this later
+--         new_file_template = {
+--           use_template = true,
+--           template = [[
+-- # {{ title }}
+-- ]]
+--         },
+      })
+    end,
+  },
 }, {})
 
 -- [[ Setting options ]]
@@ -650,7 +697,8 @@ cmp.setup {
 vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '[', '<esc>`>a]<esc>`<i[<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '{', '<esc>`>a}<esc>`<i{<esc>lv`>l', { noremap = true, silent = true })
-vim.keymap.set('v', '<', '<esc>`>a><esc>`<i<<esc>lv`>l', { noremap = true, silent = true })
+-- `<` overriding the unindent default behavior is less than ideal
+-- vim.keymap.set('v', '<', '<esc>`>a><esc>`<i<<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '"', '<esc>`>a"<esc>`<i"<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '_', '<esc>`>a_<esc>`<i_<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '*', '<esc>`>a*<esc>`<i*<esc>lv`>l', { noremap = true, silent = true })
