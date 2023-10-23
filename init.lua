@@ -59,6 +59,22 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Function to capture and return the output of a command
+-- this is used later to get config values that are sensitive
+-- and should not be kept in source code or env vars
+-- instead allows you to get them from a cli secret manager
+-- such as 1password or bitwarden cli
+function os.capture(cmd, raw)
+    local f = assert(io.popen(cmd, 'r'))
+    local s = assert(f:read('*a'))
+    f:close()
+    if raw then return s end
+    s = string.gsub(s, '^%s+', '')
+    s = string.gsub(s, '%s+$', '')
+    s = string.gsub(s, '[\n\r]+', ' ')
+    return s
+end
+
 -- NOTE: Here is where you install your plugins.
 --  You can configure plugins using the `config` key.
 --
@@ -110,7 +126,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',  opts = {} },
   {
     -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -288,7 +304,7 @@ require('lazy').setup({
         },
         buffers = {
           follow_current_file = {
-            enabled = true, -- This will find and focus the file in the active buffer every time
+            enabled = true,          -- This will find and focus the file in the active buffer every time
             --              -- the current file is changed while the tree is open.
             leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
           },
@@ -320,7 +336,7 @@ require('lazy').setup({
     config = function()
       require('mkdnflow').setup({
         modules = {
-          bib = false,
+          bib = true,
           buffers = true,
           conceal = false,
           cursor = true,
@@ -341,26 +357,36 @@ require('lazy').setup({
           conceal = false,
           context = 0,
           implicit_extension = 'md',
-          transform_implicit = function(input)
-            -- right now this has trouble with titles that begin with `@`
-            if input:match('^@') then
-              return('People/'..input)
-            else
-              return(input)
-            end
-          end,
+          -- transform_implicit = false,
           -- transform_explicit = false,
         },
         -- following commented out for now, TODO trouble shoot this later
---         new_file_template = {
---           use_template = true,
---           template = [[
--- # {{ title }}
--- ]]
---         },
+        --         new_file_template = {
+        --           use_template = true,
+        --           template = [[
+        -- # {{ title }}
+        -- ]]
+        --         },
       })
     end,
   },
+
+  {
+    "robitx/gp.nvim",
+    config = function()
+      require("gp").setup({
+        openai_api_key = os.capture("bw --nointeraction --cleanexit get notes OPENAI_API_KEY"),
+        chat_dir = vim.fn.getcwd() .. "/Chats",
+        chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+        chat_topic_gen_model = "gpt-4",
+        chat_conceal_model_params = true,
+        command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+        chat_shortcut_respond = nil,
+        chat_shortcut_delete = nil,
+        chat_shortcut_new = nil,
+      })
+    end,
+  }
 }, {})
 
 -- [[ Setting options ]]
@@ -466,7 +492,7 @@ vim.keymap.set('n', '<leader>sr', require('telescope.builtin').resume, { desc = 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim','bash' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -697,7 +723,7 @@ cmp.setup {
 vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '[', '<esc>`>a]<esc>`<i[<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '{', '<esc>`>a}<esc>`<i{<esc>lv`>l', { noremap = true, silent = true })
--- `<` overriding the unindent default behavior is less than ideal
+-- `<` overriding the unindent behavior is more important than wrapping
 -- vim.keymap.set('v', '<', '<esc>`>a><esc>`<i<<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '"', '<esc>`>a"<esc>`<i"<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '_', '<esc>`>a_<esc>`<i_<esc>lv`>l', { noremap = true, silent = true })
