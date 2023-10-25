@@ -59,22 +59,6 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Function to capture and return the output of a command
--- this is used later to get config values that are sensitive
--- and should not be kept in source code or env vars
--- instead allows you to get them from a cli secret manager
--- such as 1password or bitwarden cli
-function os.capture(cmd, raw)
-    local f = assert(io.popen(cmd, 'r'))
-    local s = assert(f:read('*a'))
-    f:close()
-    if raw then return s end
-    s = string.gsub(s, '^%s+', '')
-    s = string.gsub(s, '%s+$', '')
-    s = string.gsub(s, '[\n\r]+', ' ')
-    return s
-end
-
 -- NOTE: Here is where you install your plugins.
 --  You can configure plugins using the `config` key.
 --
@@ -313,7 +297,8 @@ require('lazy').setup({
     end,
   },
 
-  "dhruvasagar/vim-table-mode",
+  -- is redundant with mkdnflow
+  -- "dhruvasagar/vim-table-mode",
 
   {
     "windwp/nvim-autopairs",
@@ -333,7 +318,10 @@ require('lazy').setup({
 
   {
     "jakewvincent/mkdnflow.nvim",
+    branch = "dev",
     config = function()
+      -- autosave md files
+      vim.api.nvim_create_autocmd("FileType", {pattern = "markdown", command = "set awa"})
       require('mkdnflow').setup({
         modules = {
           bib = true,
@@ -353,20 +341,63 @@ require('lazy').setup({
           root_tell = '.git',
         },
         links = {
-          style = 'markdown',
+          style = 'wiki',
+          name_is_source = true,
           conceal = false,
           context = 0,
           implicit_extension = 'md',
-          -- transform_implicit = false,
-          -- transform_explicit = false,
+          transform_explicit = false,
         },
-        -- following commented out for now, TODO trouble shoot this later
-        --         new_file_template = {
-        --           use_template = true,
-        --           template = [[
-        -- # {{ title }}
-        -- ]]
-        --         },
+        to_do = {
+          symbols = {' ', '-', 'x'},
+          update_parents = false,
+          not_started = ' ',
+          in_progress = '-',
+          complete = 'x'
+        },
+        tables = {
+          trim_whitespace = true,
+          format_on_move = true,
+          auto_extend_rows = false,
+          auto_extend_cols = false
+        },
+        mappings = {
+          MkdnEnter = false, -- {{'n', 'v'}, '<CR>'},
+          MkdnTab = false,
+          MkdnSTab = false,
+          MkdnNextLink = {'n', '<Tab>'},
+          MkdnPrevLink = {'n', '<S-Tab>'},
+          MkdnNextHeading = {'n', ']]'},
+          MkdnPrevHeading = {'n', '[['},
+          MkdnGoBack = {'n', '<BS>'},
+          MkdnGoForward = {'n', '<Del>'},
+          MkdnCreateLink = {{'v'}, '<CR>'}, -- false
+          MkdnCreateLinkFromClipboard = false, -- {{'n', 'v'}, '<leader>p'},
+          MkdnFollowLink = {{'n'}, '<CR>'}, -- false
+          MkdnDestroyLink = false, --{'n', '<M-CR>'},
+          MkdnTagSpan = false, -- {'v', '<M-CR>'},
+          MkdnMoveSource = {'n', '<F2>'},
+          MkdnYankAnchorLink = {'n', 'yaa'},
+          MkdnYankFileAnchorLink = {'n', 'yfa'},
+          MkdnIncreaseHeading = {'n', '+'},
+          MkdnDecreaseHeading = {'n', '-'},
+          MkdnToggleToDo = {{'n'}, '<C-Space>'}, -- {{'n', 'v'}, '<C-Space>'},
+          MkdnNewListItem = false,
+          MkdnNewListItemBelowInsert = {'n', 'o'},
+          MkdnNewListItemAboveInsert = {'n', 'O'},
+          MkdnExtendList = false,
+          MkdnUpdateNumbering = {'n', '<leader>nn'},
+          MkdnTableNextCell = {'i', '<Tab>'},
+          MkdnTablePrevCell = {'i', '<S-Tab>'},
+          MkdnTableNextRow = false,
+          MkdnTablePrevRow = {'i', '<M-CR>'},
+          MkdnTableNewRowBelow = {'n', '<leader>ir'},
+          MkdnTableNewRowAbove = {'n', '<leader>iR'},
+          MkdnTableNewColAfter = {'n', '<leader>ic'},
+          MkdnTableNewColBefore = {'n', '<leader>iC'},
+          MkdnFoldSection = {'n', '<leader>f'},
+          MkdnUnfoldSection = {'n', '<leader>F'}
+        },
       })
     end,
   },
@@ -374,17 +405,8 @@ require('lazy').setup({
   {
     "robitx/gp.nvim",
     config = function()
-      require("gp").setup({
-        openai_api_key = os.capture("bw --nointeraction --cleanexit get notes OPENAI_API_KEY"),
-        chat_dir = vim.fn.getcwd() .. "/Chats",
-        chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-        chat_topic_gen_model = "gpt-4",
-        chat_conceal_model_params = true,
-        command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-        chat_shortcut_respond = nil,
-        chat_shortcut_delete = nil,
-        chat_shortcut_new = nil,
-      })
+      vim.keymap.set('n', '<C-g><C-g>', ':GpChatRespond<CR>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<C-g><C-n>', ':GpChatNew<CR>', { noremap = true, silent = true })
     end,
   }
 }, {})
@@ -716,8 +738,36 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
+    { name = 'mkdnflow' }
   },
 }
+
+-- [[ Configure gp.nvim ]]
+-- need to do some fancy shtuff to set it up in the bg
+-- better mutex would be good but for my use case here probably doesn't matter
+Gp_is_setup = false;
+local function setup_gp_nvim(api_key)
+  if Gp_is_setup then return end
+  Gp_is_setup = true
+  require("gp").setup({
+    openai_api_key = api_key,
+    chat_dir = vim.fn.getcwd() .. "/Chats",
+    chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+    chat_topic_gen_model = "gpt-4",
+    chat_conceal_model_params = true,
+    command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+    chat_shortcut_respond = nil,
+    chat_shortcut_delete = nil,
+    chat_shortcut_new = nil,
+  })
+  print('loading gp.nvim complete')
+end
+
+vim.fn.jobstart("bw --nointeraction --cleanexit get notes OPENAI_API_KEY", {
+  on_stdout = function (_, data, _)
+    setup_gp_nvim(data[1])
+  end
+})
 
 -- keymaps for wrapping selected text in various things
 vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
