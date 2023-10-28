@@ -321,7 +321,7 @@ require('lazy').setup({
     branch = "dev",
     config = function()
       -- autosave md files
-      vim.api.nvim_create_autocmd("FileType", {pattern = "markdown", command = "set awa"})
+      -- vim.api.nvim_create_autocmd("FileType", {pattern = "markdown", command = "set awa"})
       require('mkdnflow').setup({
         modules = {
           bib = true,
@@ -742,30 +742,53 @@ cmp.setup {
   },
 }
 
+Custom = {
+  gp_is_setup = false,
+  open_weekly_note = function()
+    local numSecondsInAWeek = 7*24*60*60
+    local currentTimeStamp = os.time()
+    local timeStampAWeekAgo = currentTimeStamp - numSecondsInAWeek
+    local yearAWeekAgo = os.date("%Y", timeStampAWeekAgo)
+    local weekAWeekAgo = os.date("%V", timeStampAWeekAgo)
+    local yearToday = os.date("%Y", currentTimeStamp)
+    local weekToday = os.date("%V", currentTimeStamp)
+    local notePath = vim.fn.getcwd() .. "/Daily Notes/" .. yearToday .. "/" .. yearToday .. "-W" .. weekToday .. ".md"
+    local fallbackPath = vim.fn.getcwd() .. "/Daily Notes/" .. yearAWeekAgo .. "/" .. yearAWeekAgo .. "-W" .. weekAWeekAgo .. ".md"
+    local f = io.open(notePath, "r")
+    if f ~= nil then
+      -- If file exists, close it and continue
+      io.close(f)
+    else
+      -- If the file does not exist, create it by copying last week's note
+      local result = os.execute("cp \"" .. fallbackPath .. "\" \"" .. notePath .. "\"")
+      if result then
+      else
+        print("Failed to create new note")
+      end
+    end
+    return "Neotree reveal_file=" .. string.gsub(notePath, '%s', '\\ ')
+  end,
+}
+
 -- [[ Configure gp.nvim ]]
 -- need to do some fancy shtuff to set it up in the bg
 -- better mutex would be good but for my use case here probably doesn't matter
-Gp_is_setup = false;
-local function setup_gp_nvim(api_key)
-  if Gp_is_setup then return end
-  Gp_is_setup = true
-  require("gp").setup({
-    openai_api_key = api_key,
-    chat_dir = vim.fn.getcwd() .. "/Chats",
-    chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-    chat_topic_gen_model = "gpt-4",
-    chat_conceal_model_params = true,
-    command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-    chat_shortcut_respond = nil,
-    chat_shortcut_delete = nil,
-    chat_shortcut_new = nil,
-  })
-  print('loading gp.nvim complete')
-end
-
 vim.fn.jobstart("bw --nointeraction --cleanexit get notes OPENAI_API_KEY", {
   on_stdout = function (_, data, _)
-    setup_gp_nvim(data[1])
+    if Custom.gp_is_setup then return end
+    Custom.gp_is_setup = true
+    require("gp").setup({
+      openai_api_key = data[1],
+      chat_dir = vim.fn.getcwd() .. "/Chats",
+      chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+      chat_topic_gen_model = "gpt-4",
+      chat_conceal_model_params = true,
+      command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+      chat_shortcut_respond = nil,
+      chat_shortcut_delete = nil,
+      chat_shortcut_new = nil,
+    })
+    print('loading gp.nvim complete')
   end
 })
 
@@ -773,7 +796,7 @@ vim.fn.jobstart("bw --nointeraction --cleanexit get notes OPENAI_API_KEY", {
 vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '[', '<esc>`>a]<esc>`<i[<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '{', '<esc>`>a}<esc>`<i{<esc>lv`>l', { noremap = true, silent = true })
--- `<` overriding the unindent behavior is more important than wrapping
+-- `<` the unindent behavior is more important than wrapping
 -- vim.keymap.set('v', '<', '<esc>`>a><esc>`<i<<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '"', '<esc>`>a"<esc>`<i"<esc>lv`>l', { noremap = true, silent = true })
 vim.keymap.set('v', '_', '<esc>`>a_<esc>`<i_<esc>lv`>l', { noremap = true, silent = true })
@@ -790,6 +813,8 @@ vim.cmd('autocmd FileType markdown set tabstop=4')
 vim.cmd('highlight CursorLine guibg=#383c44')
 vim.opt.cursorline = true
 vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
+
+vim.cmd([[command Weekly execute luaeval('Custom.open_weekly_note()')]])
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
