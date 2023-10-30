@@ -43,6 +43,22 @@ P.S. You can delete this when you're done too. It's your config now :)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
+-- Function to capture and return the output of a command
+-- this is used later to get config values that are sensitive
+-- and should not be kept in source code or env vars
+-- instead allows you to get them from a cli secret manager
+-- such as 1password or bitwarden cli
+function os.capture(cmd, raw)
+    local f = assert(io.popen(cmd, 'r'))
+    local s = assert(f:read('*a'))
+    f:close()
+    if raw then return s end
+    s = string.gsub(s, '^%s+', '')
+    s = string.gsub(s, '%s+$', '')
+    s = string.gsub(s, '[\n\r]+', ' ')
+    return s
+end
+
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
 --    `:help lazy.nvim.txt` for more info
@@ -373,7 +389,8 @@ require('lazy').setup({
           MkdnGoForward = {'n', '<Del>'},
           MkdnCreateLink = {{'v'}, '<CR>'}, -- false
           MkdnCreateLinkFromClipboard = false, -- {{'n', 'v'}, '<leader>p'},
-          MkdnFollowLink = {{'n'}, '<CR>'}, -- false
+          -- TODO re-enable once create-on-follow is optional
+          MkdnFollowLink = false, -- {{'n'}, '<CR>'},
           MkdnDestroyLink = false, --{'n', '<M-CR>'},
           MkdnTagSpan = false, -- {'v', '<M-CR>'},
           MkdnMoveSource = {'n', '<F2>'},
@@ -711,6 +728,7 @@ cmp.setup {
     ['<C-p>'] = cmp.mapping.select_prev_item(),
     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-y>'] = cmp.mapping.close(),
     ['<C-Space>'] = cmp.mapping.complete {},
     ['<CR>'] = cmp.mapping.confirm {
       behavior = cmp.ConfirmBehavior.Replace,
@@ -738,7 +756,7 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
-    { name = 'mkdnflow' }
+    -- { name = 'mkdnflow' } -- TODO commented out until completion improvements
   },
 }
 
@@ -773,24 +791,28 @@ Custom = {
 -- [[ Configure gp.nvim ]]
 -- need to do some fancy shtuff to set it up in the bg
 -- better mutex would be good but for my use case here probably doesn't matter
-vim.fn.jobstart("bw --nointeraction --cleanexit get notes OPENAI_API_KEY", {
-  on_stdout = function (_, data, _)
-    if Custom.gp_is_setup then return end
-    Custom.gp_is_setup = true
-    require("gp").setup({
-      openai_api_key = data[1],
-      chat_dir = vim.fn.getcwd() .. "/Chats",
-      chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-      chat_topic_gen_model = "gpt-4",
-      chat_conceal_model_params = true,
-      command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-      chat_shortcut_respond = nil,
-      chat_shortcut_delete = nil,
-      chat_shortcut_new = nil,
-    })
-    print('loading gp.nvim complete')
-  end
-})
+
+if os.capture("ls -d " .. vim.fn.getcwd() .. "/Chats") == vim.fn.getcwd() .. "/Chats" then
+  vim.fn.jobstart("bw --nointeraction --cleanexit get notes OPENAI_API_KEY", {
+    on_stdout = function (_, data, _)
+      if Custom.gp_is_setup then return end
+      Custom.gp_is_setup = true
+      require("gp").setup({
+        openai_api_key = data[1],
+        chat_dir = vim.fn.getcwd() .. "/Chats",
+        chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+        chat_topic_gen_model = "gpt-4",
+        chat_conceal_model_params = true,
+        command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+        chat_shortcut_respond = nil,
+        chat_shortcut_delete = nil,
+        chat_shortcut_new = nil,
+      })
+      print('loading gp.nvim complete')
+    end
+  })
+end
+
 
 -- keymaps for wrapping selected text in various things
 vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
