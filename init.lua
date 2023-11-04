@@ -313,9 +313,6 @@ require('lazy').setup({
     end,
   },
 
-  -- is redundant with mkdnflow
-  -- "dhruvasagar/vim-table-mode",
-
   {
     "windwp/nvim-autopairs",
     -- Optional dependency
@@ -332,92 +329,95 @@ require('lazy').setup({
     end,
   },
 
-  {
-    "jakewvincent/mkdnflow.nvim",
-    branch = "dev",
-    config = function()
-      -- autosave md files
-      -- vim.api.nvim_create_autocmd("FileType", {pattern = "markdown", command = "set awa"})
-      require('mkdnflow').setup({
-        modules = {
-          bib = true,
-          buffers = true,
-          conceal = false,
-          cursor = true,
-          folds = false,
-          links = true,
-          lists = true,
-          maps = true,
-          paths = true,
-          tables = true,
-          yaml = false
-        },
-        perspective = {
-          priority = 'root',
-          root_tell = '.git',
-        },
-        links = {
-          style = 'wiki',
-          name_is_source = true,
-          conceal = false,
-          context = 0,
-          implicit_extension = 'md',
-          transform_explicit = false,
-        },
-        to_do = {
-          symbols = {' ', '-', 'x'},
-          update_parents = false,
-          not_started = ' ',
-          in_progress = '-',
-          complete = 'x'
-        },
-        tables = {
-          trim_whitespace = true,
-          format_on_move = true,
-          auto_extend_rows = false,
-          auto_extend_cols = false
-        },
-        mappings = {
-          MkdnEnter = false, -- {{'n', 'v'}, '<CR>'},
-          MkdnTab = false,
-          MkdnSTab = false,
-          MkdnNextLink = {'n', '<Tab>'},
-          MkdnPrevLink = {'n', '<S-Tab>'},
-          MkdnNextHeading = {'n', ']]'},
-          MkdnPrevHeading = {'n', '[['},
-          MkdnGoBack = {'n', '<BS>'},
-          MkdnGoForward = {'n', '<Del>'},
-          MkdnCreateLink = {{'v'}, '<CR>'}, -- false
-          MkdnCreateLinkFromClipboard = false, -- {{'n', 'v'}, '<leader>p'},
-          -- TODO re-enable once create-on-follow is optional
-          MkdnFollowLink = false, -- {{'n'}, '<CR>'},
-          MkdnDestroyLink = false, --{'n', '<M-CR>'},
-          MkdnTagSpan = false, -- {'v', '<M-CR>'},
-          MkdnMoveSource = {'n', '<F2>'},
-          MkdnYankAnchorLink = {'n', 'yaa'},
-          MkdnYankFileAnchorLink = {'n', 'yfa'},
-          MkdnIncreaseHeading = {'n', '+'},
-          MkdnDecreaseHeading = {'n', '-'},
-          MkdnToggleToDo = {{'n'}, '<C-Space>'}, -- {{'n', 'v'}, '<C-Space>'},
-          MkdnNewListItem = false,
-          MkdnNewListItemBelowInsert = {'n', 'o'},
-          MkdnNewListItemAboveInsert = {'n', 'O'},
-          MkdnExtendList = false,
-          MkdnUpdateNumbering = {'n', '<leader>nn'},
-          MkdnTableNextCell = {'i', '<Tab>'},
-          MkdnTablePrevCell = {'i', '<S-Tab>'},
-          MkdnTableNextRow = false,
-          MkdnTablePrevRow = {'i', '<M-CR>'},
-          MkdnTableNewRowBelow = {'n', '<leader>ir'},
-          MkdnTableNewRowAbove = {'n', '<leader>iR'},
-          MkdnTableNewColAfter = {'n', '<leader>ic'},
-          MkdnTableNewColBefore = {'n', '<leader>iC'},
-          MkdnFoldSection = {'n', '<leader>f'},
-          MkdnUnfoldSection = {'n', '<leader>F'}
-        },
-      })
-    end,
-  },
+  -- is redundant with mkdnflow
+  -- "dhruvasagar/vim-table-mode",
+
+  -- {
+  --   "jakewvincent/mkdnflow.nvim",
+  --   branch = "dev",
+  --   config = function()
+  --     -- autosave md files
+  --     -- vim.api.nvim_create_autocmd("FileType", {pattern = "markdown", command = "set awa"})
+  --     require('mkdnflow').setup({
+  --       modules = {
+  --         bib = true,
+  --         buffers = true,
+  --         conceal = false,
+  --         cursor = true,
+  --         folds = false,
+  --         links = true,
+  --         lists = true,
+  --         maps = true,
+  --         paths = true,
+  --         tables = true,
+  --         yaml = false
+  --       },
+  --       perspective = {
+  --         priority = 'root',
+  --         root_tell = '.git',
+  --       },
+  --       links = {
+  --         style = 'wiki',
+  --         name_is_source = true,
+  --         conceal = false,
+  --         context = 0,
+  --         implicit_extension = 'md',
+  --         transform_explicit = false,
+  --       },
+  --       to_do = {
+  --         symbols = {' ', '-', 'x'},
+  --         update_parents = false,
+  --         not_started = ' ',
+  --         in_progress = '-',
+  --         complete = 'x'
+  --       },
+  --       tables = {
+  --         trim_whitespace = true,
+  --         format_on_move = true,
+  --         auto_extend_rows = false,
+  --         auto_extend_cols = false
+  --       },
+  --       mappings = {
+  --         MkdnEnter = false, -- {{'n', 'v'}, '<CR>'},
+  --         MkdnTab = false,
+  --         MkdnSTab = false,
+  --         MkdnNextLink = {'n', '<Tab>'},
+  --         MkdnPrevLink = {'n', '<S-Tab>'},
+  --         MkdnNextHeading = {'n', ']]'},
+  --         MkdnPrevHeading = {'n', '[['},
+  --         MkdnGoBack = {'n', '<BS>'},
+  --         MkdnGoForward = {'n', '<Del>'},
+  --         MkdnCreateLink = {{'v'}, '<CR>'}, -- false
+  --         MkdnCreateLinkFromClipboard = false, -- {{'n', 'v'}, '<leader>p'},
+  --         -- TODO re-enable once create-on-follow is optional
+  --         MkdnFollowLink = false, -- {{'n'}, '<CR>'},
+  --         MkdnDestroyLink = false, --{'n', '<M-CR>'},
+  --         MkdnTagSpan = false, -- {'v', '<M-CR>'},
+  --         MkdnMoveSource = {'n', '<F2>'},
+  --         MkdnYankAnchorLink = {'n', 'yaa'},
+  --         MkdnYankFileAnchorLink = {'n', 'yfa'},
+  --         MkdnIncreaseHeading = {'n', '+'},
+  --         MkdnDecreaseHeading = {'n', '-'},
+  --         MkdnToggleToDo = {{'n'}, '<C-Space>'}, -- {{'n', 'v'}, '<C-Space>'},
+  --         MkdnNewListItem = false,
+  --         MkdnNewListItemBelowInsert = {'n', 'o'},
+  --         MkdnNewListItemAboveInsert = {'n', 'O'},
+  --         MkdnExtendList = false,
+  --         MkdnUpdateNumbering = {'n', '<leader>nn'},
+  --         MkdnTableNextCell = {'i', '<Tab>'},
+  --         MkdnTablePrevCell = {'i', '<S-Tab>'},
+  --         MkdnTableNextRow = false,
+  --         MkdnTablePrevRow = {'i', '<M-CR>'},
+  --         MkdnTableNewRowBelow = {'n', '<leader>ir'},
+  --         MkdnTableNewRowAbove = {'n', '<leader>iR'},
+  --         MkdnTableNewColAfter = {'n', '<leader>ic'},
+  --         MkdnTableNewColBefore = {'n', '<leader>iC'},
+  --         MkdnFoldSection = {'n', '<leader>f'},
+  --         MkdnUnfoldSection = {'n', '<leader>F'}
+  --       },
+  --     })
+  --   end,
+  -- },
 
   {
     "robitx/gp.nvim",
@@ -791,7 +791,7 @@ Custom = {
 -- [[ Configure gp.nvim ]]
 -- need to do some fancy shtuff to set it up in the bg
 -- better mutex would be good but for my use case here probably doesn't matter
-
+-- only setup this plugin if the Chats directory exists already
 if os.capture("ls -d " .. vim.fn.getcwd() .. "/Chats") == vim.fn.getcwd() .. "/Chats" then
   vim.fn.jobstart("bw --nointeraction --cleanexit get notes OPENAI_API_KEY", {
     on_stdout = function (_, data, _)
@@ -831,12 +831,16 @@ vim.keymap.set('v', '<C-k>', '<esc>`<i[<esc>`>la]()<esc>h', { noremap = true, si
 
 vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
 vim.cmd('autocmd FileType markdown set wrap linebreak')
+vim.cmd('autocmd FileType markdown setlocal breakat=\\ ')
 vim.cmd('autocmd FileType markdown set tabstop=4')
 vim.cmd('highlight CursorLine guibg=#383c44')
 vim.opt.cursorline = true
 vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
 
-vim.cmd([[command Weekly execute luaeval('Custom.open_weekly_note()')]])
+-- Create a command to take you to the weekly note in Neotree, but only if the Daily Notes directory exists
+if os.capture("ls -d '" .. vim.fn.getcwd() .. "/Daily Notes'") == vim.fn.getcwd() .. "/Daily Notes" then
+  vim.cmd([[command Weekly execute luaeval('Custom.open_weekly_note()')]])
+end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
