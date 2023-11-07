@@ -49,7 +49,7 @@ vim.g.maplocalleader = ' '
 -- instead allows you to get them from a cli secret manager
 -- such as 1password or bitwarden cli
 function os.capture(cmd, raw)
-    local f = assert(io.popen(cmd, 'r'))
+    local f = assert(io.popen(cmd .. ' 2>&1', 'r'))
     local s = assert(f:read('*a'))
     f:close()
     if raw then return s end
@@ -181,13 +181,16 @@ require('lazy').setup({
   {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
+    dependencies = {
+      "nvim-tree/nvim-web-devicons"
+    },
     -- See `:help lualine.txt`
     opts = {
       options = {
-        icons_enabled = false,
+        icons_enabled = true,
         theme = 'onedark',
         component_separators = '|',
-        section_separators = '',
+        section_separators = { left = '', right = ''},
       },
     },
   },
@@ -329,95 +332,7 @@ require('lazy').setup({
     end,
   },
 
-  -- is redundant with mkdnflow
-  -- "dhruvasagar/vim-table-mode",
-
-  -- {
-  --   "jakewvincent/mkdnflow.nvim",
-  --   branch = "dev",
-  --   config = function()
-  --     -- autosave md files
-  --     -- vim.api.nvim_create_autocmd("FileType", {pattern = "markdown", command = "set awa"})
-  --     require('mkdnflow').setup({
-  --       modules = {
-  --         bib = true,
-  --         buffers = true,
-  --         conceal = false,
-  --         cursor = true,
-  --         folds = false,
-  --         links = true,
-  --         lists = true,
-  --         maps = true,
-  --         paths = true,
-  --         tables = true,
-  --         yaml = false
-  --       },
-  --       perspective = {
-  --         priority = 'root',
-  --         root_tell = '.git',
-  --       },
-  --       links = {
-  --         style = 'wiki',
-  --         name_is_source = true,
-  --         conceal = false,
-  --         context = 0,
-  --         implicit_extension = 'md',
-  --         transform_explicit = false,
-  --       },
-  --       to_do = {
-  --         symbols = {' ', '-', 'x'},
-  --         update_parents = false,
-  --         not_started = ' ',
-  --         in_progress = '-',
-  --         complete = 'x'
-  --       },
-  --       tables = {
-  --         trim_whitespace = true,
-  --         format_on_move = true,
-  --         auto_extend_rows = false,
-  --         auto_extend_cols = false
-  --       },
-  --       mappings = {
-  --         MkdnEnter = false, -- {{'n', 'v'}, '<CR>'},
-  --         MkdnTab = false,
-  --         MkdnSTab = false,
-  --         MkdnNextLink = {'n', '<Tab>'},
-  --         MkdnPrevLink = {'n', '<S-Tab>'},
-  --         MkdnNextHeading = {'n', ']]'},
-  --         MkdnPrevHeading = {'n', '[['},
-  --         MkdnGoBack = {'n', '<BS>'},
-  --         MkdnGoForward = {'n', '<Del>'},
-  --         MkdnCreateLink = {{'v'}, '<CR>'}, -- false
-  --         MkdnCreateLinkFromClipboard = false, -- {{'n', 'v'}, '<leader>p'},
-  --         -- TODO re-enable once create-on-follow is optional
-  --         MkdnFollowLink = false, -- {{'n'}, '<CR>'},
-  --         MkdnDestroyLink = false, --{'n', '<M-CR>'},
-  --         MkdnTagSpan = false, -- {'v', '<M-CR>'},
-  --         MkdnMoveSource = {'n', '<F2>'},
-  --         MkdnYankAnchorLink = {'n', 'yaa'},
-  --         MkdnYankFileAnchorLink = {'n', 'yfa'},
-  --         MkdnIncreaseHeading = {'n', '+'},
-  --         MkdnDecreaseHeading = {'n', '-'},
-  --         MkdnToggleToDo = {{'n'}, '<C-Space>'}, -- {{'n', 'v'}, '<C-Space>'},
-  --         MkdnNewListItem = false,
-  --         MkdnNewListItemBelowInsert = {'n', 'o'},
-  --         MkdnNewListItemAboveInsert = {'n', 'O'},
-  --         MkdnExtendList = false,
-  --         MkdnUpdateNumbering = {'n', '<leader>nn'},
-  --         MkdnTableNextCell = {'i', '<Tab>'},
-  --         MkdnTablePrevCell = {'i', '<S-Tab>'},
-  --         MkdnTableNextRow = false,
-  --         MkdnTablePrevRow = {'i', '<M-CR>'},
-  --         MkdnTableNewRowBelow = {'n', '<leader>ir'},
-  --         MkdnTableNewRowAbove = {'n', '<leader>iR'},
-  --         MkdnTableNewColAfter = {'n', '<leader>ic'},
-  --         MkdnTableNewColBefore = {'n', '<leader>iC'},
-  --         MkdnFoldSection = {'n', '<leader>f'},
-  --         MkdnUnfoldSection = {'n', '<leader>F'}
-  --       },
-  --     })
-  --   end,
-  -- },
+  "dhruvasagar/vim-table-mode",
 
   {
     "robitx/gp.nvim",
@@ -425,7 +340,35 @@ require('lazy').setup({
       vim.keymap.set('n', '<C-g><C-g>', ':GpChatRespond<CR>', { noremap = true, silent = true })
       vim.keymap.set('n', '<C-g><C-n>', ':GpChatNew<CR>', { noremap = true, silent = true })
     end,
+  },
+
+  {
+    "rcarriga/nvim-notify",
+    config = function()
+      vim.notify = require("notify")
+      require("notify").setup({
+        background_colour = "#000000",
+      })
+      require("telescope").load_extension("notify")
+    end
+  },
+
+  {
+    "numToStr/FTerm.nvim",
+    config = function()
+      require'FTerm'.setup({
+        border = 'rounded',
+        dimensions  = {
+          height = 0.8,
+          width = 0.8,
+          x = 0.5,
+          y = 0.5,
+        },
+      })
+      vim.keymap.set('n', '<A-i>', '<CMD>lua require("FTerm").toggle()<CR>')
+    end
   }
+
 }, {})
 
 -- [[ Setting options ]]
@@ -756,12 +699,12 @@ cmp.setup {
   sources = {
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
-    -- { name = 'mkdnflow' } -- TODO commented out until completion improvements
   },
 }
 
 Custom = {
   gp_is_setup = false,
+
   open_weekly_note = function()
     local numSecondsInAWeek = 7*24*60*60
     local currentTimeStamp = os.time()
@@ -781,38 +724,56 @@ Custom = {
       local result = os.execute("cp \"" .. fallbackPath .. "\" \"" .. notePath .. "\"")
       if result then
       else
-        print("Failed to create new note")
+        vim.notify('Failed to create new note', vim.log.levels.ERROR, {
+          title = 'Weekly Note'
+        })
       end
+      return
     end
-    return "Neotree reveal_file=" .. string.gsub(notePath, '%s', '\\ ')
+    vim.api.nvim_exec2("Neotree reveal_file=" .. string.gsub(notePath, '%s', '\\ '), {})
   end,
-}
 
 -- [[ Configure gp.nvim ]]
 -- need to do some fancy shtuff to set it up in the bg
 -- better mutex would be good but for my use case here probably doesn't matter
--- only setup this plugin if the Chats directory exists already
-if os.capture("ls -d " .. vim.fn.getcwd() .. "/Chats") == vim.fn.getcwd() .. "/Chats" then
-  vim.fn.jobstart("bw --nointeraction --cleanexit get notes OPENAI_API_KEY", {
-    on_stdout = function (_, data, _)
-      if Custom.gp_is_setup then return end
-      Custom.gp_is_setup = true
-      require("gp").setup({
-        openai_api_key = data[1],
-        chat_dir = vim.fn.getcwd() .. "/Chats",
-        chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-        chat_topic_gen_model = "gpt-4",
-        chat_conceal_model_params = true,
-        command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-        chat_shortcut_respond = nil,
-        chat_shortcut_delete = nil,
-        chat_shortcut_new = nil,
-      })
-      print('loading gp.nvim complete')
+  load_gp = function(pswd)
+    local cmd = "bw --nointeraction --cleanexit get notes OPENAI_API_KEY"
+    if pswd ~= nil then
+      cmd = cmd .. " --session $(bw unlock " .. pswd .. " --raw)"
     end
-  })
-end
+    vim.fn.jobstart(cmd, {
+      on_stdout = function (_, data, _)
+        if Custom.gp_is_setup then return end
+        if data[1] == '' then
+          vim.notify('No API key found, plugin not loaded\nCan be loaded manually with :LoadGp', vim.log.levels.WARN, {
+            title = 'gp.nvim'
+          })
+          return
+        end
+        Custom.gp_is_setup = true
+        require("gp").setup({
+          openai_api_key = data[1],
+          chat_dir = vim.fn.getcwd() .. "/Chats",
+          chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+          chat_topic_gen_model = "gpt-4",
+          chat_conceal_model_params = true,
+          command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+          chat_shortcut_respond = nil,
+          chat_shortcut_delete = nil,
+          chat_shortcut_new = nil,
+        })
+        vim.notify('Loaded', vim.log.levels.INFO, {
+          title = 'gp.nvim'
+        })
+      end
+    })
+  end,
+}
 
+-- if there is a chats directory, attempt to autoload gp.nvim (requires bw vault to be unlocked)
+if os.capture("ls -d " .. vim.fn.getcwd() .. "/Chats") == vim.fn.getcwd() .. "/Chats" then
+  Custom.load_gp()
+end
 
 -- keymaps for wrapping selected text in various things
 vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
@@ -839,8 +800,15 @@ vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
 
 -- Create a command to take you to the weekly note in Neotree, but only if the Daily Notes directory exists
 if os.capture("ls -d '" .. vim.fn.getcwd() .. "/Daily Notes'") == vim.fn.getcwd() .. "/Daily Notes" then
-  vim.cmd([[command Weekly execute luaeval('Custom.open_weekly_note()')]])
+  vim.api.nvim_create_user_command('Weekly', Custom.open_weekly_note, {desc = 'Open or create weekly note'})
 end
+
+-- vim.cmd([[command LoadGp execute luaeval('Custom.load_gp(vim.fn.inputsecret(\'Enter your Bitwarden master password: \'))')]])
+vim.api.nvim_create_user_command('LoadGp', function()
+  Custom.load_gp(vim.fn.inputsecret('Enter your Bitwarden master password: '))
+end, { desc = 'Manually load gp.nvim' })
+
+vim.opt.termguicolors = true
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
