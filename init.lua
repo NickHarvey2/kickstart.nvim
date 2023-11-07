@@ -803,7 +803,8 @@ if os.capture("ls -d '" .. vim.fn.getcwd() .. "/Daily Notes'") == vim.fn.getcwd(
   vim.api.nvim_create_user_command('Weekly', Custom.open_weekly_note, {desc = 'Open or create weekly note'})
 end
 
--- vim.cmd([[command LoadGp execute luaeval('Custom.load_gp(vim.fn.inputsecret(\'Enter your Bitwarden master password: \'))')]])
+-- Command to read in the bw master password so that we can grab the API key needed to
+-- load gp.nvim, if the vault wasn't unlocked when we launched
 vim.api.nvim_create_user_command('LoadGp', function()
   Custom.load_gp(vim.fn.inputsecret('Enter your Bitwarden master password: '))
 end, { desc = 'Manually load gp.nvim' })
