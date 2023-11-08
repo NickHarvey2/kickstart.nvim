@@ -304,13 +304,23 @@ require('lazy').setup({
             enabled = true,
             leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
           },
+          window = {
+            mappings = {
+              ["<bs>"] = false,
+            }
+          }
         },
         buffers = {
           follow_current_file = {
             enabled = true,          -- This will find and focus the file in the active buffer every time
-            --              -- the current file is changed while the tree is open.
+                                     -- the current file is changed while the tree is open.
             leave_dirs_open = false, -- `false` closes auto expanded dirs, such as with `:Neotree reveal`
           },
+          window = {
+            mappings = {
+              ["<bs>"] = false,
+            }
+          }
         },
       })
     end,
@@ -702,78 +712,148 @@ cmp.setup {
   },
 }
 
-Custom = {
-  gp_is_setup = false,
+-- [[ Various custom config ]]
+-- deferred to allow the notify plugin to load
+vim.defer_fn(function ()
+  Custom = {
+    gp_is_setup = false,
 
-  open_weekly_note = function()
-    local numSecondsInAWeek = 7*24*60*60
-    local currentTimeStamp = os.time()
-    local timeStampAWeekAgo = currentTimeStamp - numSecondsInAWeek
-    local yearAWeekAgo = os.date("%Y", timeStampAWeekAgo)
-    local weekAWeekAgo = os.date("%V", timeStampAWeekAgo)
-    local yearToday = os.date("%Y", currentTimeStamp)
-    local weekToday = os.date("%V", currentTimeStamp)
-    local notePath = vim.fn.getcwd() .. "/Daily Notes/" .. yearToday .. "/" .. yearToday .. "-W" .. weekToday .. ".md"
-    local fallbackPath = vim.fn.getcwd() .. "/Daily Notes/" .. yearAWeekAgo .. "/" .. yearAWeekAgo .. "-W" .. weekAWeekAgo .. ".md"
-    local f = io.open(notePath, "r")
-    if f ~= nil then
-      -- If file exists, close it and continue
-      io.close(f)
-    else
-      -- If the file does not exist, create it by copying last week's note
-      local result = os.execute("cp \"" .. fallbackPath .. "\" \"" .. notePath .. "\"")
-      if result then
+    open_weekly_note = function()
+      local numSecondsInAWeek = 7*24*60*60
+      local currentTimeStamp = os.time()
+      local timeStampAWeekAgo = currentTimeStamp - numSecondsInAWeek
+      local yearAWeekAgo = os.date("%Y", timeStampAWeekAgo)
+      local weekAWeekAgo = os.date("%V", timeStampAWeekAgo)
+      local yearToday = os.date("%Y", currentTimeStamp)
+      local weekToday = os.date("%V", currentTimeStamp)
+      local notePath = vim.fn.getcwd() .. "/Daily Notes/" .. yearToday .. "/" .. yearToday .. "-W" .. weekToday .. ".md"
+      local fallbackPath = vim.fn.getcwd() .. "/Daily Notes/" .. yearAWeekAgo .. "/" .. yearAWeekAgo .. "-W" .. weekAWeekAgo .. ".md"
+      local f = io.open(notePath, "r")
+      if f ~= nil then
+        -- If file exists, close it and continue
+        io.close(f)
       else
-        vim.notify('Failed to create new note', vim.log.levels.ERROR, {
-          title = 'Weekly Note'
-        })
-      end
-      return
-    end
-    vim.api.nvim_exec2("Neotree reveal_file=" .. string.gsub(notePath, '%s', '\\ '), {})
-  end,
-
--- [[ Configure gp.nvim ]]
--- need to do some fancy shtuff to set it up in the bg
--- better mutex would be good but for my use case here probably doesn't matter
-  load_gp = function(pswd)
-    local cmd = "bw --nointeraction --cleanexit get notes OPENAI_API_KEY"
-    if pswd ~= nil then
-      cmd = cmd .. " --session $(bw unlock " .. pswd .. " --raw)"
-    end
-    vim.fn.jobstart(cmd, {
-      on_stdout = function (_, data, _)
-        if Custom.gp_is_setup then return end
-        if data[1] == '' then
-          vim.notify('No API key found, plugin not loaded\nCan be loaded manually with :LoadGp', vim.log.levels.WARN, {
-            title = 'gp.nvim'
+        -- If the file does not exist, create it by copying last week's note
+        local result = os.execute("cp \"" .. fallbackPath .. "\" \"" .. notePath .. "\"")
+        if result then
+        else
+          vim.notify('Failed to create new note', vim.log.levels.ERROR, {
+            title = 'Weekly Note'
           })
-          return
         end
-        Custom.gp_is_setup = true
-        require("gp").setup({
-          openai_api_key = data[1],
-          chat_dir = vim.fn.getcwd() .. "/Chats",
-          chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-          chat_topic_gen_model = "gpt-4",
-          chat_conceal_model_params = true,
-          command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
-          chat_shortcut_respond = nil,
-          chat_shortcut_delete = nil,
-          chat_shortcut_new = nil,
-        })
-        vim.notify('Loaded', vim.log.levels.INFO, {
-          title = 'gp.nvim'
-        })
+        return
       end
-    })
-  end,
-}
+      vim.api.nvim_exec2("Neotree reveal_file=" .. string.gsub(notePath, '%s', '\\ '), {})
+    end,
 
--- if there is a chats directory, attempt to autoload gp.nvim (requires bw vault to be unlocked)
-if os.capture("ls -d " .. vim.fn.getcwd() .. "/Chats") == vim.fn.getcwd() .. "/Chats" then
-  Custom.load_gp()
-end
+  -- [[ Configure gp.nvim ]]
+  -- need to do some fancy shtuff to set it up in the bg
+  -- better mutex would be good but for my use case here probably doesn't matter
+    load_gp = function(pswd)
+      local n = Custom.start_spinning_notify('Loading', vim.log.levels.INFO, { title = 'gp.nvim' })
+      local cmd = "bw --nointeraction --cleanexit get notes OPENAI_API_KEY"
+      if pswd ~= nil then
+        cmd = cmd .. " --session $(bw unlock " .. pswd .. " --raw)"
+      end
+      vim.fn.jobstart(cmd, {
+        on_stdout = function (_, data, _)
+          if Custom.gp_is_setup then return end
+          if data[1] == '' then
+            Custom.stop_spinning_notify(n, 'No API key found, plugin not loaded', vim.log.levels.WARN, {
+              icon = Custom.spinner_cancelled,
+            })
+            return
+          end
+          Custom.gp_is_setup = true
+          require("gp").setup({
+            openai_api_key = data[1],
+            chat_dir = vim.fn.getcwd() .. "/Chats",
+            chat_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+            chat_topic_gen_model = "gpt-4",
+            chat_conceal_model_params = true,
+            command_model = { model = "gpt-4", temperature = 1.1, top_p = 1 },
+            chat_shortcut_respond = nil,
+            chat_shortcut_delete = nil,
+            chat_shortcut_new = nil,
+          })
+          Custom.stop_spinning_notify(n, 'Loaded', vim.log.levels.INFO, {})
+        end
+      })
+    end,
+
+    table_last = function(T)
+      local last = nil
+      for k in pairs(T) do last = k end
+      return last
+    end,
+
+    spinner_frames = { "⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷" };
+    spinner_complete = "";
+    spinner_cancelled = "󰜺";
+    spinner_error = "";
+    spinning_notifications = {};
+
+    start_spinning_notify = function(msg, level, opts)
+      local id = 1
+      if Custom.table_last(Custom.spinning_notifications) ~= nil then
+        id = Custom.table_last(Custom.spinning_notifications)+1
+      end
+      local frame = 1
+      Custom.spinning_notifications[id] = vim.notify(msg, level, {
+        timeout = false,
+        title = opts.title,
+        hide_from_history = opts.hide_from_history,
+        icon = Custom.spinner_frames[frame],
+      })
+      vim.defer_fn(function()
+        Custom.continue_spinning_notify(id, frame)
+      end, 100)
+      return id
+    end,
+
+    continue_spinning_notify = function(id, frame)
+      frame = (frame + 1) % 8
+      if Custom.spinning_notifications[id] ~= nil then
+        Custom.spinning_notifications[id] = vim.notify(nil, nil, {
+          hide_from_history = true,
+          icon = Custom.spinner_frames[frame],
+          replace = Custom.spinning_notifications[id],
+        })
+        vim.defer_fn(function ()
+          Custom.continue_spinning_notify(id, frame)
+        end, 100)
+      end
+    end,
+
+    stop_spinning_notify = function (id, msg, level, opts)
+      if opts.timeout == nil then opts.timeout = 3000 end
+      if opts.icon == nil then opts.icon = Custom.spinner_complete end
+      Custom.spinning_notifications[id] = vim.notify(msg, level, {
+        title = opts.title,
+        icon = opts.icon,
+        replace = Custom.spinning_notifications[id],
+        timeout = opts.timeout,
+      })
+      Custom.spinning_notifications[id] = nil
+    end
+  }
+
+  -- if there is a chats directory, attempt to autoload gp.nvim (requires bw vault to be unlocked)
+  if os.capture("ls -d " .. vim.fn.getcwd() .. "/Chats") == vim.fn.getcwd() .. "/Chats" then
+    Custom.load_gp()
+  end
+
+  -- Create a command to take you to the weekly note in Neotree, but only if the Daily Notes directory exists
+  if os.capture("ls -d '" .. vim.fn.getcwd() .. "/Daily Notes'") == vim.fn.getcwd() .. "/Daily Notes" then
+    vim.api.nvim_create_user_command('Weekly', Custom.open_weekly_note, {desc = 'Open or create weekly note'})
+  end
+
+  -- Command to read in the bw master password so that we can grab the API key needed to
+  -- load gp.nvim, if the vault wasn't unlocked when we launched
+  vim.api.nvim_create_user_command('LoadGp', function()
+    Custom.load_gp(vim.fn.inputsecret('Enter your Bitwarden master password: '))
+  end, { desc = 'Manually load gp.nvim' })
+end, 0)
 
 -- keymaps for wrapping selected text in various things
 vim.keymap.set('v', '(', '<esc>`>a)<esc>`<i(<esc>lv`>l', { noremap = true, silent = true })
@@ -797,17 +877,6 @@ vim.cmd('autocmd FileType markdown set tabstop=4')
 vim.cmd('highlight CursorLine guibg=#383c44')
 vim.opt.cursorline = true
 vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
-
--- Create a command to take you to the weekly note in Neotree, but only if the Daily Notes directory exists
-if os.capture("ls -d '" .. vim.fn.getcwd() .. "/Daily Notes'") == vim.fn.getcwd() .. "/Daily Notes" then
-  vim.api.nvim_create_user_command('Weekly', Custom.open_weekly_note, {desc = 'Open or create weekly note'})
-end
-
--- Command to read in the bw master password so that we can grab the API key needed to
--- load gp.nvim, if the vault wasn't unlocked when we launched
-vim.api.nvim_create_user_command('LoadGp', function()
-  Custom.load_gp(vim.fn.inputsecret('Enter your Bitwarden master password: '))
-end, { desc = 'Manually load gp.nvim' })
 
 vim.opt.termguicolors = true
 
