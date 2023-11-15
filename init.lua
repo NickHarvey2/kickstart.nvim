@@ -347,8 +347,8 @@ require('lazy').setup({
   {
     "robitx/gp.nvim",
     config = function()
-      vim.keymap.set('n', '<C-g><C-g>', ':GpChatRespond<CR>', { noremap = true, silent = true })
-      vim.keymap.set('n', '<C-g><C-n>', ':GpChatNew<CR>', { noremap = true, silent = true })
+      vim.keymap.set('n', '<C-g><C-g>', ":lua vim.notify('Plugin not loaded, use :LoadGp to load it', vim.log.levels.ERROR, { title = 'gp.nvim' })<CR>", { noremap = true, silent = true })
+      vim.keymap.set('n', '<C-g><C-n>', ":lua vim.notify('Plugin not loaded, use :LoadGp to load it', vim.log.levels.ERROR, { title = 'gp.nvim' })<CR>", { noremap = true, silent = true })
     end,
   },
 
@@ -377,7 +377,9 @@ require('lazy').setup({
       })
       vim.keymap.set('n', '<A-i>', '<CMD>lua require("FTerm").toggle()<CR>')
     end
-  }
+  },
+
+  { "mg979/vim-visual-multi" },
 
 }, {})
 
@@ -633,6 +635,10 @@ local servers = {
 
   csharp_ls = {},
 
+  powershell_es = {},
+
+  vale_ls = {},
+
   -- zk = {},
 
   lua_ls = {
@@ -781,6 +787,8 @@ vim.defer_fn(function ()
             chat_shortcut_delete = nil,
             chat_shortcut_new = nil,
           })
+          vim.keymap.set('n', '<C-g><C-g>', ':GpChatRespond<CR>', { noremap = true, silent = true })
+          vim.keymap.set('n', '<C-g><C-n>', ':GpChatNew<CR>', { noremap = true, silent = true })
           Custom.stop_spinning_notify(n, 'Loaded', vim.log.levels.INFO, {})
         end
       })
@@ -879,6 +887,7 @@ vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
 vim.cmd('autocmd FileType markdown set wrap linebreak')
 vim.cmd('autocmd FileType markdown setlocal breakat=\\ ')
 vim.cmd('autocmd FileType markdown set tabstop=4')
+vim.cmd('autocmd FileType markdown set shiftwidth=4')
 vim.cmd('highlight CursorLine guibg=#383c44')
 vim.opt.cursorline = true
 vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
