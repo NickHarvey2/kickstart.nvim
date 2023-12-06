@@ -381,6 +381,15 @@ require('lazy').setup({
 
   { "mg979/vim-visual-multi" },
 
+  {
+    "mickael-menu/zk-nvim",
+    config = function()
+      require("zk").setup({
+        picker = "telescope"
+      })
+    end
+  }
+
 }, {})
 
 -- [[ Setting options ]]
@@ -491,7 +500,10 @@ vim.defer_fn(function()
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
 
-    highlight = { enable = true },
+    highlight = {
+      enable = true,
+      additional_vim_regex_highlighting = { "markdown" }
+    },
     indent = { enable = true },
     incremental_selection = {
       enable = true,
@@ -643,7 +655,7 @@ local servers = {
 
   yamlls = {},
 
-  -- zk = {},
+  zk = {},
 
   lua_ls = {
     Lua = {
