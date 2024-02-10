@@ -645,7 +645,7 @@ local servers = {
     },
   },
 
-  csharp_ls = {},
+  omnisharp = {},
 
   powershell_es = {},
 
@@ -903,13 +903,15 @@ vim.keymap.set('n', '<TAB>', '<S-v>><esc>', { noremap = true, silent = true })
 vim.keymap.set('n', '<S-TAB>', '<S-v><<esc>', { noremap = true, silent = true })
 vim.keymap.set('v', '<TAB>', '>gv', { noremap = true, silent = true })
 vim.keymap.set('v', '<S-TAB>', '<gv', { noremap = true, silent = true })
+vim.keymap.set('n', '<A-Up>', '5k', {noremap = true})
+vim.keymap.set('n', '<A-Down>', '5j', {noremap = true})
 
 vim.cmd('autocmd FileType markdown setlocal spell spelllang=en_us')
 vim.cmd('autocmd FileType markdown set wrap linebreak')
 vim.cmd('autocmd FileType markdown setlocal breakat=\\ ')
 vim.cmd('autocmd FileType markdown set tabstop=4')
 vim.cmd('autocmd FileType markdown set shiftwidth=4')
-vim.cmd('highlight CursorLine guibg=#383c44')
+vim.cmd('highlight CursorLine guibg=#30343c')
 vim.opt.cursorline = true
 vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
 
