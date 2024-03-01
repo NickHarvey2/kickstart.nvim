@@ -927,4 +927,4 @@ vim.cmd('highlight SpellBad guibg=#550000 gui=underline')
 vim.opt.termguicolors = true
 
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+-- vim: ts=4 sts=4 sw=4 et
